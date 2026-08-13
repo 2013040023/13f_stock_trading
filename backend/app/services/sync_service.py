@@ -43,7 +43,7 @@ async def sync_investor(investor_id: str, cik: str, force: bool = False) -> dict
 
     async with async_session() as db:
         synced = []
-        for i, filing_meta in enumerate(filings):
+        for i, filing_meta in enumerate(reversed(filings)):
             acc = filing_meta["accession_number"]
             period = filing_meta["period_of_report"]
 
