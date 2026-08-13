@@ -167,7 +167,7 @@ async def _get_ticker(db: AsyncSession, cusip: str, company_name: str) -> str | 
     return ticker
 
 
-async def update_prices(investor_id: str | None = None) -> int:
+async def update_prices(investor_id=None) -> int:
     """최신 분기 holdings의 현재가 업데이트."""
     async with async_session() as db:
         # 최신 filing 조회

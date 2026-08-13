@@ -83,18 +83,32 @@ async def get_13f_holdings(cik: str, accession: str) -> list[dict]:
 
 
 def _find_infotable_filename(html: str, accession: str) -> Optional[str]:
-    """인덱스 HTML에서 informationTable XML 파일명 찾기."""
-    patterns = [
-        r'href="([^"]*(?:infotable|information[_-]?table|13f)[^"]*\.xml)"',
-        r'href="([^"]*\.xml)"',
-    ]
-    for pat in patterns:
-        m = re.search(pat, html, re.IGNORECASE)
-        if m:
-            fname = m.group(1)
-            if "/" in fname:
-                fname = fname.split("/")[-1]
+    """인덱스 HTML에서 informationTable XML 파일명 찾기.
+
+    primary_doc.xml은 커버시트 → 제외.
+    다른 XML 파일이 실제 holdings table.
+    """
+    # 모든 XML href 수집 (xsl 경로 제외)
+    xml_links = re.findall(r'href="([^"]*\.xml)"', html, re.IGNORECASE)
+    candidates = []
+    for link in xml_links:
+        fname = link.split("/")[-1]
+        if fname.lower() == "primary_doc.xml":
+            continue
+        if "xsl" in link.lower():
+            continue
+        if fname not in candidates:
+            candidates.append(fname)
+
+    if candidates:
+        return candidates[0]
+
+    # 마지막 수단: primary_doc.xml이 아닌 첫 .xml
+    for link in xml_links:
+        fname = link.split("/")[-1]
+        if fname.lower() != "primary_doc.xml":
             return fname
+
     return None
 
 

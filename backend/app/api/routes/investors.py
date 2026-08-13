@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,7 +35,7 @@ async def list_investors(db: AsyncSession = Depends(get_db)):
             "latest_period": latest.period_of_report if latest else None,
             "latest_filed": latest.filed_at if latest else None,
             "total_value_k": latest.total_value if latest else 0,
-            "total_value_m": round((latest.total_value or 0) / 1000, 1),
+            "total_value_m": round((latest.total_value / 1000) if latest and latest.total_value else 0, 1),
             "holdings_count": holdings_count,
         })
     return results
@@ -72,7 +73,7 @@ async def get_investor(investor_id: str, db: AsyncSession = Depends(get_db)):
 @router.get("/{investor_id}/holdings")
 async def get_investor_holdings(
     investor_id: str,
-    period: str | None = None,
+    period: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
 ):
     """투자자의 보유 종목 반환. period 미지정 시 최신 분기."""

@@ -98,7 +98,12 @@ export default function Dashboard() {
                     최신 분기: {inv.latest_period} | 공시: {inv.latest_filed}
                   </div>
                 )}
-                {!inv.latest_period && (
+                {!inv.latest_period && (inv as any).exempt_note && (
+                  <div style={{ marginTop: 12, fontSize: 11, color: '#f59e0b', borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+                    🚫 {(inv as any).exempt_note}
+                  </div>
+                )}
+                {!inv.latest_period && !(inv as any).exempt_note && (
                   <div style={{ marginTop: 12, fontSize: 11, color: '#f59e0b', borderTop: '1px solid var(--border)', paddingTop: 10 }}>
                     ⚠️ 데이터 없음 — 우측 상단 '동기화' 클릭
                   </div>
