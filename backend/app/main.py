@@ -13,10 +13,12 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    # 백그라운드 자동 동기화 (24시간 주기)
-    task = asyncio.create_task(_auto_sync())
+    sync_task = asyncio.create_task(_auto_sync())
+    from app.services.telegram_service import start_bot, stop_bot
+    await start_bot()
     yield
-    task.cancel()
+    sync_task.cancel()
+    await stop_bot()
 
 
 async def _auto_sync():
