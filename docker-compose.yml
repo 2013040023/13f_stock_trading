@@ -1,0 +1,18 @@
+services:
+  backend:
+    build: ./backend
+    container_name: 13f-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: 13f-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
