@@ -14,11 +14,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname
 async def lifespan(app: FastAPI):
     await init_db()
     sync_task = asyncio.create_task(_auto_sync())
-    from app.services.telegram_service import start_bot, stop_bot
-    await start_bot()
     yield
     sync_task.cancel()
-    await stop_bot()
 
 
 async def _auto_sync():
