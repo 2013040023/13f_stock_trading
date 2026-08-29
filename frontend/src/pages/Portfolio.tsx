@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useApi, fmt_m, fmt_num, pct_color } from '../hooks/useApi'
 import Card from '../components/Card'
@@ -42,9 +43,12 @@ export default function Portfolio() {
   if (error) return <div style={{ padding: 40, color: 'var(--red)' }}>오류: {error}</div>
   if (!data) return null
 
+  const [newOnly, setNewOnly] = useState(false)
+
   const inv = data.investor
   const holdings = data.holdings.filter(h => !h.is_sold)
   const newBuys = holdings.filter(h => h.is_new)
+  const displayed = newOnly ? newBuys : holdings
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -69,12 +73,17 @@ export default function Portfolio() {
         {[
           { label: '운용 규모', value: fmt_m(data.total_value_k) },
           { label: '보유 종목', value: `${holdings.length}개` },
-          { label: '신규 매수', value: `${newBuys.length}개` },
+          { label: '신규 매수', value: `${newBuys.length}개`, clickable: true },
           { label: '분기', value: data.period },
         ].map(s => (
-          <Card key={s.label}>
+          <Card
+            key={s.label}
+            onClick={s.clickable && newBuys.length > 0 ? () => setNewOnly(v => !v) : undefined}
+            style={s.clickable && newBuys.length > 0 ? { cursor: 'pointer', outline: newOnly ? `2px solid ${inv.color}` : 'none' } : {}}
+          >
             <div style={{ fontSize: 11, color: 'var(--text2)', marginBottom: 4 }}>{s.label}</div>
             <div style={{ fontWeight: 700, fontSize: 18, color: inv.color }}>{s.value}</div>
+            {s.clickable && newOnly && <div style={{ fontSize: 10, color: inv.color, marginTop: 2 }}>필터 중 ✓</div>}
           </Card>
         ))}
       </div>
@@ -97,7 +106,7 @@ export default function Portfolio() {
               </tr>
             </thead>
             <tbody>
-              {holdings.map((h, i) => (
+              {displayed.map((h, i) => (
                 <tr key={h.id} style={{
                   borderBottom: '1px solid var(--border)',
                   background: h.is_new ? '#10b98108' : 'transparent',
