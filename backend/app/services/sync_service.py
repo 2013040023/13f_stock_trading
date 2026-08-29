@@ -64,6 +64,17 @@ async def sync_investor(investor_id: str, cik: str, force: bool = False) -> dict
                 logger.warning(f"[sync] {investor_id} {period}: no holdings parsed")
                 continue
 
+            # 동일 CUSIP 중복 합산 (버크셔처럼 자회사별로 각각 보고하는 경우)
+            cusip_map: dict[str, dict] = {}
+            for h in holdings_raw:
+                k = h["cusip"]
+                if k in cusip_map:
+                    cusip_map[k]["shares"] += h["shares"]
+                    cusip_map[k]["value"] += h["value"]
+                else:
+                    cusip_map[k] = dict(h)
+            holdings_raw = list(cusip_map.values())
+
             total_value = sum(h["value"] for h in holdings_raw)
 
             if existing:

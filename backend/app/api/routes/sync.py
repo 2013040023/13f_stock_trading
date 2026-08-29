@@ -16,12 +16,12 @@ async def trigger_sync_all(background_tasks: BackgroundTasks, force: bool = Fals
 
 
 @router.post("/{investor_id}")
-async def trigger_sync_investor(investor_id: str, background_tasks: BackgroundTasks):
+async def trigger_sync_investor(investor_id: str, background_tasks: BackgroundTasks, force: bool = False):
     inv = INVESTOR_MAP.get(investor_id)
     if not inv:
         from fastapi import HTTPException
         raise HTTPException(404, "investor not found")
-    background_tasks.add_task(sync_investor, investor_id, inv["cik"])
+    background_tasks.add_task(sync_investor, investor_id, inv["cik"], force=force)
     return {"status": "started", "investor": investor_id}
 
 
